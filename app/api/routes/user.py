@@ -1,14 +1,14 @@
-from fastapi import Depends, APIRouter
+from fastapi import Depends, APIRouter, Request
 from typing import Optional, Annotated
 from sqlalchemy.ext.asyncio import AsyncSession
 
-router = APIRouter()
-
-
 from app.crud.user import UserCRUD
 from app.models import User
-from app.dependencies import get_db, user_exists
+from app.dependencies import get_db
+from app.dependencies import ObjectChecker, UserChecker
 
+
+router = APIRouter()
 
 @router.get("/user/{unique_id}")
 async def get_user(
@@ -28,17 +28,23 @@ async def get_user(
 @router.post("/user")
 async def create_user(
     user: User,
+    request: Request,
     db_session: Annotated[AsyncSession, Depends(get_db)],
-    is_exist: Annotated[bool, Depends(user_exists)]
 ) -> User:
     crud = UserCRUD()
+    ObjectChecker.set_checker(UserChecker)
+
+    is_exist = await ObjectChecker.check(request)
     return await crud.create(user, db_session, is_exist)
 
 @router.delete("/user/{unique_id}")
 async def delete_user(
     unique_id: int,
+    request: Request,
     db_session: Annotated[AsyncSession, Depends(get_db)],
-    is_exist: Annotated[bool, Depends(user_exists)]
 ) -> None:
     crud = UserCRUD()
+    ObjectChecker.set_checker(UserChecker)
+    
+    is_exist = await ObjectChecker.check(request)
     return await crud.delete(unique_id, db_session, is_exist)

@@ -16,6 +16,7 @@ class ProductsCRUD(BaseCRUD[Product, ProductCreate, ProductUpdate]):
         
     async def retrieve(self, unique_id: int, db_session: AsyncSession) -> Product:
         statement = select(Product).where(Product.id == unique_id)
+        print()
         result = await db_session.execute(statement)
         return result.scalars().first()
         

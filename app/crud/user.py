@@ -40,5 +40,5 @@ class UserCRUD(BaseCRUD[User, UserCreate, UserUpdate]):
         statement = delete(User).where(User.id == unique_id)
         result = await db_session.execute(statement)
         await db_session.commit()
-        return HTTPException(status_code=204, detail="Product deleted")
+        return HTTPException(status_code=204, detail="User deleted")
     

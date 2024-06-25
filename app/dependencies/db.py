@@ -18,9 +18,7 @@ async def product_exists(request: Request) -> bool:
         case "POST":
             body = await request.json()
             statement = select(Product).where(Product.name == body.get('name'))
-        case "PUT":
-            statement = select(Product).where(Product.id == int(request.path_params['unique_id']))
-        case "DELETE":
+        case _:
             statement = select(Product).where(Product.id == int(request.path_params['unique_id']))
 
     result = await request.state.db.execute(statement)
@@ -33,9 +31,7 @@ async def user_exists(request: Request) -> bool:
             body = await request.json()
             statement = select(User).where(User.username == body.get('username')
                                            or User.email == body.get('email'))
-        case "PUT":
-            statement = select(User).where(User.id == int(request.path_params['unique_id']))
-        case "DELETE":
+        case _:
             statement = select(User).where(User.id == int(request.path_params['unique_id']))
 
     result = await request.state.db.execute(statement)

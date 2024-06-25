@@ -1,14 +1,15 @@
-from fastapi import Depends, APIRouter
+from fastapi import Depends, APIRouter, Request
 from typing import Optional, Annotated
 from sqlalchemy.ext.asyncio import AsyncSession
 
-router = APIRouter()
-
-
+from app.dependencies import ObjectChecker
 from app.crud.products import ProductsCRUD
 from app.models import Product
-from app.dependencies import get_db, product_exists
+from app.dependencies import get_db
+from app.dependencies import ObjectChecker, ProductChecker
 
+
+router = APIRouter()
 
 @router.get("/products/{unique_id}")
 async def get_product(
@@ -28,27 +29,36 @@ async def get_products(
 @router.post("/products")
 async def create_product(
     product: Product,
+    request: Request,
     db_session: Annotated[AsyncSession, Depends(get_db)],
-    is_exist: Annotated[bool, Depends(product_exists)]
 ) -> Product:
     crud = ProductsCRUD()
+    ObjectChecker.set_checker(ProductChecker)
+
+    is_exist = await ObjectChecker.check(request)
     return await crud.create(product, db_session, is_exist)
 
 @router.put("/products/{unique_id}")
 async def update_product(
     unique_id: int,
     product: Product,
+    request: Request,
     db_session: Annotated[AsyncSession, Depends(get_db)],
-    is_exist: Annotated[bool, Depends(product_exists)]
 ) -> None:
     crud = ProductsCRUD()
+    ObjectChecker.set_checker(ProductChecker)
+
+    is_exist = await ObjectChecker.check(request)
     return await crud.update(unique_id, product, db_session, is_exist)
 
 @router.delete("/products/{unique_id}")
 async def delete_product(
     unique_id: int, 
+    request: Request,
     db_session: Annotated[AsyncSession, Depends(get_db)],
-    is_exist: Annotated[bool, Depends(product_exists)]
 ) -> None:
     crud = ProductsCRUD()
+    ObjectChecker.set_checker(ProductChecker)
+    
+    is_exist = await ObjectChecker.check(request)
     return await crud.delete(unique_id, db_session, is_exist)
