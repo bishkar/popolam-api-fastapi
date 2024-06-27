@@ -14,7 +14,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES = settings.ACCESS_TOKEN_EXPIRE_MINUTES
 REFRESH_TOKEN_EXPIRE_MINUTES = settings.REFRESH_TOKEN_EXPIRE_MINUTES
 
 
-async def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
+async def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
     to_encode = data.copy()
     if expires_delta:
         expire = datetime.utcnow() + expires_delta
@@ -24,7 +24,7 @@ async def create_access_token(data: dict, expires_delta: Optional[timedelta] = N
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
-async def create_refresh_token(data: dict, expires_delta: Optional[timedelta] = None):
+async def create_refresh_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
     to_encode = data.copy()
     if expires_delta:
         expire = datetime.utcnow() + expires_delta
@@ -34,7 +34,7 @@ async def create_refresh_token(data: dict, expires_delta: Optional[timedelta] = 
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
-async def verify_token(token: str):
+async def verify_token(token: str) -> Dict[str, Any]:
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         return payload
@@ -46,8 +46,12 @@ async def get_token_for_user(user: User, password: str) -> Optional[TokenPair]:
     if not is_verified:
         return HTTPException(status_code=400, detail="Incorrect password")
     
+    return await create_token_pair(user)
+
+async def create_token_pair(user: User) -> TokenPair:
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     refresh_token_expires = timedelta(minutes=REFRESH_TOKEN_EXPIRE_MINUTES)
+
     data = {
         "user_id": user.id,
         "username": user.username,
@@ -56,8 +60,9 @@ async def get_token_for_user(user: User, password: str) -> Optional[TokenPair]:
     access_token = await create_access_token(
         data=data, expires_delta=access_token_expires
     )
+
     refresh_token = await create_refresh_token(
         data=data, expires_delta=refresh_token_expires
     )
-
-    return TokenPair(access_token=access_token, refresh_token=refresh_token)
+    return TokenPair(access=access_token, refresh=refresh_token)
+    

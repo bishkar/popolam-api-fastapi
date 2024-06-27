@@ -9,7 +9,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import Depends
 
 from app.misc import get_token_for_user, verify_token
+from app.misc.jwt_helpers import create_token_pair
 from app.models import User
+from app.models.token import TokenPair
 from app.models.user import UserLogin, UserPreview
 
 
@@ -20,7 +22,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 async def get_token(
     data: UserLogin,
     db_session: Annotated[AsyncSession, Depends(get_db)]
-):
+) -> TokenPair:
     statement = select(User).where(User.username == data.username)
     user = await db_session.execute(statement)
     user = user.scalars().first()
@@ -45,3 +47,16 @@ async def get_current_user(
     
     return UserPreview.from_orm(user)
 
+@router.post("/refresh/")
+async def refresh_token(
+    token: Annotated[str, Depends(oauth2_scheme)],
+    db_session: Annotated[AsyncSession, Depends(get_db)]
+) -> TokenPair:
+    payload = await verify_token(token)
+    user_id = payload.get("user_id")
+    if user_id is None:
+        raise HTTPException(status_code=403, detail="Invalid token payload")
+    
+    user = await db_session.get(User, user_id)
+
+    return await create_token_pair(user)

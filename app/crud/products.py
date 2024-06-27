@@ -40,7 +40,7 @@ class ProductsCRUD(BaseCRUD[Product, ProductCreate, ProductUpdate]):
         if check_product:
             raise HTTPException(status_code=404, detail="Product already exists")
 
-        update_data = data.dict(exclude={'id'})  
+        update_data = dict(filter(lambda x: x[1] is not None, data.dict(exclude={'id'}).items()))
         statement = (
             update(Product)
             .where(Product.id == unique_id)
@@ -48,8 +48,7 @@ class ProductsCRUD(BaseCRUD[Product, ProductCreate, ProductUpdate]):
             .returning(Product)
         )
         
-        result = await db_session.execute(statement)
-        
+        await db_session.execute(statement)
         await db_session.commit()
         return HTTPException(status_code=204, detail="Product updated")
 
