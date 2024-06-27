@@ -17,10 +17,3 @@ class OrderCreate(SQLModel):
     customer: int
     product: int
     quantity: int
-    is_paid: bool
-
-class OrderUpdate(SQLModel):
-    customer: Optional[int]
-    product: Optional[int]
-    quantity: Optional[int]
-    is_paid: Optional[bool]
