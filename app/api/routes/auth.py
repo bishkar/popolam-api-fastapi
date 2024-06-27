@@ -40,10 +40,7 @@ async def get_current_user(
     user_id = payload.get("user_id")
     if user_id is None:
         raise HTTPException(status_code=403, detail="Invalid token payload")
-    
-    statement = select(User).where(User.id == user_id)
-    user = await db_session.execute(statement)
-    user = user.scalars().first()
+    user = await db_session.get(User, user_id)
     
     return UserPreview.from_orm(user)
 

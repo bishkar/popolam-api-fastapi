@@ -28,12 +28,12 @@ class ObjectChecker(Checker):
 class ProductChecker(Checker):
     @staticmethod
     async def check(request: Request) -> bool:
-        match request.method:
-            case "POST":
-                body = await request.json()
-                statement = select(Product).where(Product.name == body.get('name'))
-            case _:
-                statement = select(Product).where(Product.id == int(request.path_params['unique_id']))
+        body = await request.json()
+        
+        if not request.method == "POST":
+            return await request.state.db.get(Product, int(request.path_params['unique_id']))
+        
+        statement = select(Product).where(Product.name == body.get('name'))
         result = await request.state.db.execute(statement)
         product = result.scalars().first()
         return product is not None
@@ -42,13 +42,13 @@ class ProductChecker(Checker):
 class UserChecker(Checker):
     @staticmethod
     async def check(request: Request) -> bool:
-        match request.method:
-            case "POST":
-                body = await request.json()
-                statement = select(User).where(User.username == body.get('username')
+        if not request.method == "POST":
+            return await request.state.db.get(User, int(request.path_params['unique_id']))
+        
+        body = await request.json()
+        statement = select(User).where(User.username == body.get('username')
                                             or User.email == body.get('email'))
-            case _:
-                statement = select(User).where(User.id == int(request.path_params['unique_id']))
+
         result = await request.state.db.execute(statement)
         user = result.scalars().first()
         return user is not None

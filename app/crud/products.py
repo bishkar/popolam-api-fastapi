@@ -15,10 +15,8 @@ class ProductsCRUD(BaseCRUD[Product, ProductCreate, ProductUpdate]):
         return result.scalars().all()
         
     async def retrieve(self, unique_id: int, db_session: AsyncSession) -> Product:
-        statement = select(Product).where(Product.id == unique_id)
-        print()
-        result = await db_session.execute(statement)
-        return result.scalars().first()
+        product = await db_session.get(Product, unique_id)
+        return product
         
     async def create(self, data: ProductCreate, db_session: AsyncSession, is_exist: bool) -> Product:
         if is_exist:
@@ -57,9 +55,8 @@ class ProductsCRUD(BaseCRUD[Product, ProductCreate, ProductUpdate]):
         if not is_exist:
             raise HTTPException(status_code=404, detail="Product not found")
         
-        statement = select(Product).where(Product.id == unique_id)
-        result = await db_session.execute(statement)
-        product = result.scalars().first()
+        product = await self.retrieve(unique_id, db_session)
+
         await db_session.delete(product)
         await db_session.commit()
         return HTTPException(status_code=204, detail="Product deleted")
