@@ -5,19 +5,24 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 from fastapi import HTTPException, status
 
 from app.crud.base import BaseCRUD
-from app.models.user import User, UserCreate, UserUpdate
+from app.models.user import User, UserCreate, UserUpdate, UserPreview
 
 
 class UserCRUD(BaseCRUD[User, UserCreate, UserUpdate]):
-    async def get(self, db_session: AsyncSession) -> List[User]:
+    async def get(self, db_session: AsyncSession) -> UserPreview:
         statement = select(User)
         result = await db_session.execute(statement)
-        return result.scalars().all()
+        users = result.scalars().all()
+        user_previews = [UserPreview.from_orm(user) for user in users]
+        return user_previews
+        
     
-    async def retrieve(self, unique_id: int, db_session: AsyncSession) -> Optional[User]:        
-        statement = select(User).where(User.id == unique_id)
-        result = await db_session.execute(statement)
-        return result.scalars().first()
+    async def retrieve(self, unique_id: int, db_session: AsyncSession) -> Optional[UserPreview]:        
+        user = await db_session.get(User, unique_id)
+        if not user:
+            return None
+        
+        return UserPreview.from_orm(user)
     
     async def create(self, data: UserCreate, db_session: AsyncSession, is_exist: bool) -> User:
         if is_exist:

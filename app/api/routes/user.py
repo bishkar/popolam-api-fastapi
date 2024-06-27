@@ -1,5 +1,5 @@
 from fastapi import Depends, APIRouter, HTTPException, Request
-from typing import Optional, Annotated
+from typing import List, Optional, Annotated
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
@@ -7,7 +7,7 @@ from sqlmodel import select
 from app.api.routes.auth import get_current_user
 from app.crud.user import UserCRUD, UserCreate, UserUpdate
 from app.misc.jwt_helpers import verify_token
-from app.models import User
+from app.models import User, UserPreview
 from app.dependencies import get_db
 from app.misc import ObjectChecker, UserChecker
 
@@ -19,14 +19,14 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 async def get_user(
     unique_id: int, 
     db_session: Annotated[AsyncSession, Depends(get_db)]
-) -> Optional[User]:
+) -> Optional[UserPreview]:
     crud = UserCRUD()
     return await crud.retrieve(unique_id, db_session)
 
 @router.get("/")
 async def get_users(
     db_session: Annotated[AsyncSession, Depends(get_db)]
-) -> list[User]:
+) -> List[UserPreview]:
     crud = UserCRUD()
     return await crud.get(db_session)
 

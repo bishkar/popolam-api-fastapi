@@ -49,7 +49,6 @@ class ProductsCRUD(BaseCRUD[Product, ProductCreate, ProductUpdate]):
         await db_session.execute(statement)
         await db_session.commit()
         return HTTPException(status_code=204, detail="Product updated")
-
     
     async def delete(self, unique_id: int, db_session: AsyncSession, is_exist: bool) -> None:
         if not is_exist:
