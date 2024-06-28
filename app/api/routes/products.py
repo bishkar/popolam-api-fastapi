@@ -1,6 +1,7 @@
 from fastapi import Depends, APIRouter, HTTPException, Request
 from typing import Optional, Annotated
 from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi_cache.decorator import cache
 
 from app.api.routes.auth import get_current_user
 from app.crud.products import ProductsCRUD
@@ -21,6 +22,7 @@ async def get_product(
     return await crud.retrieve(unique_id, db_session)
 
 @router.get("/")
+@cache(expire=60, namespace="products")
 async def get_products(
     db_session: Annotated[AsyncSession, Depends(get_db)]
 ) -> list[Product]:

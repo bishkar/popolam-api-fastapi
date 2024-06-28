@@ -65,4 +65,3 @@ async def create_token_pair(user: User) -> TokenPair:
         data=data, expires_delta=refresh_token_expires
     )
     return TokenPair(access=access_token, refresh=refresh_token)
-    

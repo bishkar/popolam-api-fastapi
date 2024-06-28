@@ -1,6 +1,5 @@
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, HTTPException
 from fastapi.security import OAuth2PasswordBearer
-import jwt
 from sqlalchemy.future import select
 from typing import Annotated, Union
 
