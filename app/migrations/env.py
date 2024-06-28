@@ -1,19 +1,16 @@
+import sys
 from logging.config import fileConfig
-
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
+from os.path import abspath, dirname
 
 from alembic import context
+from sqlalchemy import engine_from_config, pool
+from sqlmodel import SQLModel
 
 from app.database import DATABASE_URL
-from sqlmodel import SQLModel
+from app.models.order import Order  # noqa
+from app.models.product import Product  # noqa
 # here we need to import the models to be able to autogenerate migrations
-from app.models.user import User # noqa
-from app.models.product import Product # noqa
-from app.models.order import Order # noqa
-
-import sys
-from os.path import dirname, abspath
+from app.models.user import User  # noqa
 
 sys.path.insert(0, dirname(dirname(abspath(__file__))))
 

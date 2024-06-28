@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Generic, Optional, TypeVar, List
+from typing import Generic, List, Optional, TypeVar
 
 Model = TypeVar("Model")
 CreateSchema = TypeVar("CreateSchema")

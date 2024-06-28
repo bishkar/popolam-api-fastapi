@@ -1,14 +1,13 @@
-from typing import Any, Dict, Optional, Tuple
 from passlib.context import CryptContext
-from sqlmodel import Field, SQLModel, select
-
+from sqlmodel import Field, SQLModel
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
 
 class UserBase(SQLModel):
     email: str = Field(unique=True)
     username: str = Field(unique=True)
-    first_name: str 
+    first_name: str
     last_name: str
     age: int = Field(default=None)
 
@@ -50,4 +49,3 @@ class UserPreview(SQLModel):
     is_admin: bool
     balance: float
     age: int
-    
